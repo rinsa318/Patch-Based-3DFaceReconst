@@ -99,3 +99,28 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+
+
+## manual setting below
+# ignore .dat file
+shape_predictor_68_face_landmarks.dat
+
+# ignore date and result folder
+data/
+experiment_data/
+gittest/
+document/
+
+
+log.txt
+
+*.sh
+*.pyc
+*.pdf
+*.jpg
+*.png
+*.bmp
+
+# unfinished scripts
+colortransfer.py 

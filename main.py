@@ -2,10 +2,10 @@
  ----------------------------------------------------
   @Author: tsukasa
   @Affiliation: Waseda University
-  @Email: n1.n2n3__n4n5@ruri.waseda.jp
+  @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-01 05:29:38
-  @Last Modified by:   wazano318
-  @Last Modified time: 2017-11-14 15:21:53
+  @Last Modified by:   tsukasa
+  @Last Modified time: 2018-04-13 17:22:19
  ----------------------------------------------------
 
   Usage:
@@ -682,7 +682,7 @@ def main():
   masked_rgb_result = apply_mask_cut(rgb_result, mask)
   pil_rgb_output = Image.fromarray((masked_rgb_result*255).astype(np.uint8))
   pil_rgb_output.save(input_fullpath + "/" + filename + "_estimated_rgb.png")
-  # pil_rgb_output.show()
+  pil_rgb_output.show()
   print("save reconst rgb image --> " + str(filename) + "_estimated_rgb.png")
 
   # save normal result
@@ -690,7 +690,7 @@ def main():
   masked_normal_result = apply_mask_cut(normal_result, mask)
   pil_normal_output = Image.fromarray((masked_normal_result*255).astype(np.uint8))
   pil_normal_output.save(input_fullpath + "/" + filename + "_estimated_normal.png")
-  # pil_normal_output.show()
+  pil_normal_output.show()
   print("save reconst normal image --> " + str(filename) + "_estimated_normal.png")
   print("done!")
 

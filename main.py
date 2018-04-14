@@ -5,7 +5,7 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-01 05:29:38
   @Last Modified by:   tsukasa
-  @Last Modified time: 2018-04-13 17:22:19
+  @Last Modified time: 2018-04-13 16:37:01
  ----------------------------------------------------
 
   Usage:
@@ -553,10 +553,13 @@ def surface_reconstruction(normal_image, mask_image):
           pixel = y * normal_image.shape[1] + x
           # depths[y,x,:] = int(255*(d[0][pixel] - dmin) / (dmax - dmin))
           depths[y,x,:] = int(255*(d[0][pixel]))
-
+          print(int((d[0][pixel])))
 
   # Image.fromarray(depths, 'RGB').save("sphere.7.depth.png")
   # np.savetxt('test.csv', d, delimiter=',')
+
+  new_d = np.array([[d[0][y*normal_image.shape[1]+x]-dmin for x in range(1,normal_image.shape[1])] for y in range(1,normal_image.shape[0])])
+  print(new_d.shape)
 
   step = 5
   xarr = np.array([[i for i in xrange(1,normal_image.shape[1]-1,step)] for j in xrange(1,normal_image.shape[0]-1,step)])

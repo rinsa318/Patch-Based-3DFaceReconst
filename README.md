@@ -1,4 +1,4 @@
-# pb3dfr: Patch-Based 3D face reconstruction
+# Patch-Based 3D Face Reconstruction
 
 This project is following a paper below.  
 

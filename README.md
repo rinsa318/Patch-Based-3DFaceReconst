@@ -23,15 +23,14 @@ Python2.7(Anaconda2-5.2.0)
 + [shape_predictor_68_face_landmarks.dat](http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 "")
 
 
-### Prerequisites
+### Dataset
 
-What things you need to install the software and how to install them
+Prepare pair of RGB images and Normal image(depth). These images must have compleate corresponding between RGB and Normal image.  
+In our case, we use 20 people's data for Patch dataset.
 
-```
-Give examples
-```
 
-### Installing
+
+## How to run
 
 A step by step series of examples that tell you have to get a development env running
 

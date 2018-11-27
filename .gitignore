@@ -119,7 +119,7 @@ log.txt
 *.pyc
 *.pdf
 *.jpg
-#*.png
+*.png
 *.bmp
 
 # unfinished scripts

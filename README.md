@@ -31,7 +31,8 @@ Python2.7(Anaconda2-5.2.0)
 
 ### Dataset
 
-To run my code, you have to prepare dataset below. 
+To run my code, you have to prepare dataset below.  
+68 landmark points and mask image can extract by using creat_data.py
 
 + RGB images, Normal map images and Mask images
 + taken under the same measurement environment(lighting environment)
@@ -39,7 +40,9 @@ To run my code, you have to prepare dataset below.
 of eyes at the same point between all image
 + 68 landmark points for each face is needed for take correscponding --> dlib
 
-68 landmark points and mask image can extract by using creat_data.py
+
+
+
 
 
 ### Running the tests

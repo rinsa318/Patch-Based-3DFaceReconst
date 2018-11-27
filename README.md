@@ -23,82 +23,35 @@ Python2.7(Anaconda2-5.2.0)
 + [shape_predictor_68_face_landmarks.dat](http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 "")
 
 
-### Dataset
-
-Prepare pair of RGB images and Normal image(depth). These images must have compleate corresponding between RGB and Normal image.  
-In our case, we use 20 people's data for Patch dataset.
 
 
 
 ## How to run
 
-A step by step series of examples that tell you have to get a development env running
 
-Say what the step will be
+### Dataset
 
-```
-Give the example
-```
+To run my code, you have to prepare dataset below. 
 
-And repeat
++ RGB images, Normal map images and Mask images
++ taken under the same measurement environment(lighting environment)
++ facial position, scale and rotation are normalized by fitting both inner corners
+of eyes at the same point between all image
++ 68 landmark points for each face is needed for take correscponding --> dlib
 
-```
-until finished
-```
+68 landmark points and mask image can extract by using creat_data.py
 
-End with an example of getting some data out of the system or using it for a little demo
 
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
+### Running the tests
 
 ```
-Give an example
+python main.py argvs[1] argvs[2] argvs[3] argvs[4]
+
+argvs[1] : input image path 
+argvs[2] : Landmark identifier −> shape predictor 68 face landmarks.dat 
+argvs[3] : (optinal) patch size −> default = 10[pixel]
+argvs[4] : (optinal) overlap size −> default = 5[pixel]
+
 ```
 
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone who's code was used
-* Inspiration
-* etc
 

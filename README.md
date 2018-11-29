@@ -1,6 +1,6 @@
 # Patch-Based 3D Face Reconstruction
 
-This project is following a paper below.  
+This is my undergraguate project, and this is following a paper below.  
 
 "3D Facial Geometry Reconstruction using Patch Database",  
 Tsukasa Nozawa, Takuya Kato, Pavel A. Savkin, Naoki Nozawa, Shigeo Morishima,  

@@ -36,8 +36,8 @@ To run my code, you have to prepare dataset below.
 
 + RGB images, Normal map images and Mask images
 + taken under the same measurement environment(lighting environment)
-+ facial position, scale and rotation have to normalize. --> We normalize them by fitting both inner corners
-of eyes at the same point between all image
++ facial position, scale and rotation have to normalize  
+  --> We normalized them by fitting both inner corners of eyes at the same point between all image
 + 68 landmark points for each face is needed for take correscponding --> dlib
 
 

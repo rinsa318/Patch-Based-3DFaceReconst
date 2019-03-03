@@ -4,15 +4,15 @@
   @Affiliation: Waseda University
   @Email: n1.n2n3__n4n5@ruri.waseda.jp
   @Date: 2017-07-18 23:14:59
-  @Last Modified by:   wazano318
-  @Last Modified time: 2017-11-14 15:18:22
+  @Last Modified by:   rinsa318
+  @Last Modified time: 2019-03-02 22:04:43
  ----------------------------------------------------
 
   Usage:
    python dlib_utils.py argvs[1] argvs[2] argvs[3]...
   
    argvs[1]  :  input file path
-   argvs[2]  :  Landmark identifier   -->   .dat
+   argvs[2]  :  landmark identifier   -->   .dat
 
 
 """
@@ -40,9 +40,9 @@ def get_landmarks(image, detector, predictor):
   print("start get landmark ........")
   detections = detector(image, 1)
   for k,d in enumerate(detections): #For all detected face instances individually
-  	shape = predictor(image, d) #Draw Facial Landmarks with the predictor class
+  	shape = predictor(image, d) #Draw Facial landmarks with the predictor class
 
-  # create new Landmark numpy arry
+  # create new landmark numpy arry
   landmarks = np.empty([shape.num_parts, 2], dtype = int)
   for i in range(shape.num_parts):
     landmarks[i][0] = shape.part(i).x
@@ -58,9 +58,15 @@ def get_landmarks(image, detector, predictor):
 
 
 
-def visualize_landmark(image, landmarks, input_fullpath, filename):
+# def visualize_landmark(image, landmarks, input_fullpath, filename):
+def visualize_landmark(image, landmarks):
 
-  output= image.copy()
+  '''
+  input: image array, landmark array(68 points)
+  output: image with landmark points
+  '''
+
+  output = image.copy()#np.zeros((image.shape), dtype=np.uint8)
   if len(landmarks) == 68:
 
     # create new vector about each parts
@@ -126,61 +132,62 @@ def visualize_landmark(image, landmarks, input_fullpath, filename):
       cv2.circle(output, pos, 1, (0,0,255), thickness=2)
       cv2.putText(output, str(i+1), pos, cv2.FONT_HERSHEY_PLAIN, 0.75, (255,255,255), 1, cv2.LINE_AA)
 
-    cv2.imwrite(input_fullpath + "/" + filename + "_landmark.png", output)
-    # cv2.imshow("Landmark detection result", output)
+    # cv2.imwrite(input_fullpath + "/" + filename + "_landmark.png", output)
+    # cv2.imshow("landmark detection result", output)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
-    print("save landmark image --> landmark_image.png")
-    # return output
+    # print("save landmark image --> landmark_image.png")
+    return output
 
 
   else:
-    print('error!!')
-    # return output
+    print('landmarks visualize error!!')
+    return output
 
 
-def create_mask_image(image, landmarks, input_fullpath, filename):
+# def create_mask_image(image, landmarks, input_fullpath, filename):
+def create_mask(image, landmarks):
   """
-  this function is need 68 landmark
+  input: image array, landmark array(68 points)
+  return: mask array
 
   """
   
   output = image.copy()
-  black_img = np.zeros((output.shape[0], output.shape[1]), dtype=np.uint8)
+  mask = np.zeros((output.shape[0], output.shape[1]), dtype=np.uint8)
 
-  base = landmarks[27] - landmarks[8]
+  # base = landmarks[27] - landmarks[8]
   # initial_base = base / 6
-  initial_base = 1.5 * (base / 6)
+  # initial_base = 1.5 * (base / 6)
   
   outline = []
   for i in range(17):
     outline.append(landmarks[i])
 
-  outline.append(landmarks[26] + initial_base)
-  outline.append(landmarks[24] + initial_base)
-  outline.append(landmarks[19] + initial_base)
-  outline.append(landmarks[17] + initial_base)
+  outline.append(landmarks[26])
+  outline.append(landmarks[24])
+  outline.append(landmarks[19])
+  outline.append(landmarks[17])
   outline.append(landmarks[0])
-
 
   outline = np.array(outline, dtype=int)
   outline = outline.reshape((-1, 1, 2))
-  cv2.fillPoly(black_img, pts =[outline], color=255)
-  cv2.imwrite(input_fullpath + "/" + filename + "_mask.png", black_img)
-  # cv2.imshow("Landmark detection result", output)
+  cv2.fillPoly(mask, pts =[outline], color=255)
+  # cv2.imwrite(input_fullpath + "/" + filename + "_mask.png", mask)
+  # cv2.imshow("landmark detection result", output)
   # cv2.waitKey(0)
   # cv2.destroyAllWindows()
-  print("save landmark outline image --> mask_image.png")
+  # print("save landmark outline image --> mask_image.png")
 
-  for y in range(black_img.shape[0]):
-    for x in range(black_img.shape[1]):
+  # for y in range(mask.shape[0]):
+  #   for x in range(mask.shape[1]):
 
-      if(black_img[y][x] > 240):
-        black_img[y][x] = True
-      else:
-        black_img[y][x] = False
+  #     if(mask[y][x] > 240):
+  #       mask[y][x] = True
+  #     else:
+  #       mask[y][x] = False
 
-  return black_img
+  return mask
 
 
 
@@ -268,20 +275,44 @@ def resize_image(image, rate):
 
 
 
-def landmark_output(landmarks, input_fullpath, filename):
-  """
-  this function can export landmarks as text file
+def export_landmark(landmarks, filepath):
 
-  """
- 
-  # # to export pure future point
-  f = open(input_fullpath + "/" + filename + "_landmark.txt", "w")
+  f = open(filepath, "w")
 
   for i in range(len(landmarks)):
     f.write(str(landmarks[i][0]) + "," + str(landmarks[i][1]) + "\n")
 
 
-  # # to export modified version
+
+# def landmark_output(landmarks, input_fullpath, filename):
+def edit_landmark(landmarks):
+  """
+  this function can export landmarks as text file
+
+  """
+ 
+  # # # to export pure future point
+  # f = open(input_fullpath + "/" + filename + "_landmark.txt", "w")
+
+  # for i in range(len(landmarks)):
+  #   f.write(str(landmarks[i][0]) + "," + str(landmarks[i][1]) + "\n")
+
+  # base = landmarks[27] - landmarks[8]
+  # initial_base = base / 6
+  # initial_base = 1.5 * (base / 6)
+  
+  # outline = []
+  # for i in range(17):
+  #   outline.append(landmarks[i])
+
+  # outline.append(landmarks[26] + initial_base)
+  # outline.append(landmarks[24] + initial_base)
+  # outline.append(landmarks[19] + initial_base)
+  # outline.append(landmarks[17] + initial_base)
+  # outline.append(landmarks[0])
+
+
+  ## to export modified version
   new_landmarks = landmarks.copy()
   base = landmarks[27] - landmarks[8]
   # initial_base = base / 6 + ((base / 6) / 6)
@@ -291,12 +322,12 @@ def landmark_output(landmarks, input_fullpath, filename):
     if(i == 17 or i == 19 or i == 24 or i == 26):
       new_landmarks[i] = landmarks[i] + initial_base
 
-  f = open(input_fullpath + "/" + filename + "_modified_landmark.txt", "w")
+  # f = open(input_fullpath + "/" + filename + "_modified_landmark.txt", "w")
 
-  for i in range(len(new_landmarks)):
-    f.write(str(new_landmarks[i][0]) + "," + str(new_landmarks[i][1]) + "\n")
+  # for i in range(len(new_landmarks)):
+  #   f.write(str(new_landmarks[i][0]) + "," + str(new_landmarks[i][1]) + "\n")
 
-  print("save landmark --> output_landmark.txt")
+  # print("save landmark --> output_landmark.txt")
 
   return new_landmarks
 
@@ -352,7 +383,8 @@ def create_facet_list(landmarks, pt1, pt2, pt3):
 
 
 
-def draw_each_triangles(image, input_fullpath, filename, landmarks, facet_array, facet_color, wirecolor=(255, 255, 255)):
+# def draw_each_triangles(image, input_fullpath, filename, landmarks, facet_array, facet_color, wirecolor=(255, 255, 255)):
+def draw_each_triangles(image, landmarks, facet_array, facet_color, wirecolor=(255, 255, 255)):
 
   output_triangle = image.copy()
   output_mesh = image.copy()
@@ -360,22 +392,22 @@ def draw_each_triangles(image, input_fullpath, filename, landmarks, facet_array,
   tri_color_new = np.load(facet_color)
   # print(tri_color_new.shape)
 
-  new_landmarks = landmarks.copy()
-  base = landmarks[27] - landmarks[8]
-  # initial_base = base / 6 + ((base / 6) / 6)
-  initial_base = 1.5 * (base / 6)
+  # new_landmarks = landmarks.copy()
+  # base = landmarks[27] - landmarks[8]
+  # # initial_base = base / 6 + ((base / 6) / 6)
+  # initial_base = 1.5 * (base / 6)
 
-  for i in range(new_landmarks.shape[0]) :
-    if(i == 17 or i == 19 or i == 24 or i == 26):
-      new_landmarks[i] = landmarks[i] + initial_base
+  # for i in range(new_landmarks.shape[0]) :
+  #   if(i == 17 or i == 19 or i == 24 or i == 26):
+  #     new_landmarks[i] = landmarks[i] + initial_base
 
   # tri_color = []
   for i in range(facet_array.shape[0]):
 
       # # for mesh
-      A = (new_landmarks[facet_array[i][0]][0], new_landmarks[facet_array[i][0]][1])
-      B = (new_landmarks[facet_array[i][1]][0], new_landmarks[facet_array[i][1]][1])
-      C = (new_landmarks[facet_array[i][2]][0], new_landmarks[facet_array[i][2]][1])
+      A = (landmarks[facet_array[i][0]][0], landmarks[facet_array[i][0]][1])
+      B = (landmarks[facet_array[i][1]][0], landmarks[facet_array[i][1]][1])
+      C = (landmarks[facet_array[i][2]][0], landmarks[facet_array[i][2]][1])
 
       cv2.line(output_mesh, A, B, wirecolor, 2, 0)
       cv2.line(output_mesh, B, C, wirecolor, 2, 0)
@@ -383,30 +415,31 @@ def draw_each_triangles(image, input_fullpath, filename, landmarks, facet_array,
 
       # # for triangles
       tri = []
-      tri.append(new_landmarks[facet_array[i]][0])
-      tri.append(new_landmarks[facet_array[i]][1])
-      tri.append(new_landmarks[facet_array[i]][2])
+      tri.append(landmarks[facet_array[i]][0])
+      tri.append(landmarks[facet_array[i]][1])
+      tri.append(landmarks[facet_array[i]][2])
       tri = np.array(tri, dtype=int)
 
       center_point = tri.mean(axis = 0)
       center = (int(center_point[0]), int(center_point[1]))
 
 
-      color = (tri_color_new[i][0], tri_color_new[i][1], tri_color_new[i][2])
+      color = (int(tri_color_new[i][0]), int(tri_color_new[i][1]), int(tri_color_new[i][2]))
       cv2.fillPoly(output_triangle, [tri], color)
       # cv2.putText(output_triangle, str(i+1), center, cv2.FONT_HERSHEY_PLAIN, 0.75, (255,255,255), 1, cv2.LINE_AA)
 
 
-  cv2.imwrite(input_fullpath + "/" + filename + "_mesh.png", output_mesh)
-  cv2.imwrite(input_fullpath + "/" + filename + "_triangle.png", output_triangle)
-  print("drew each triangles and mesh")
+  # cv2.imwrite(input_fullpath + "/" + filename + "_mesh.png", output_mesh)
+  # cv2.imwrite(input_fullpath + "/" + filename + "_triangle.png", output_triangle)
+  # print("drew each triangles and mesh")
 
 
   return output_mesh, output_triangle
 
 
 
-def kd_tree(image, input_fullpath, filename,  landmarks, facet_array, num):
+# def kd_tree(image, input_fullpath, filename,  landmarks, facet_array, num):
+def kd_tree(image, landmarks, facet_array, num):
 
   """
   firnd nearest face by using kd-tree
@@ -419,48 +452,48 @@ def kd_tree(image, input_fullpath, filename,  landmarks, facet_array, num):
 
   print("stert kd-tree .......")
 
-  output = image.copy()
+  center_image = image.copy()
 
 
 
-  # initilize fp list
-  new_landmarks = landmarks.copy()
-  base = landmarks[27] - landmarks[8]
-  # initial_base = base / 6
-  initial_base = 1.5 * (base / 6)
+  # # initilize fp list
+  # new_landmarks = landmarks.copy()
+  # base = landmarks[27] - landmarks[8]
+  # # initial_base = base / 6
+  # initial_base = 1.5 * (base / 6)
 
-  for i in range(new_landmarks.shape[0]) :
-    if(i == 17 or i == 19 or i == 24 or i == 26):
-      new_landmarks[i] = landmarks[i] + initial_base
+  # for i in range(new_landmarks.shape[0]) :
+  #   if(i == 17 or i == 19 or i == 24 or i == 26):
+  #     new_landmarks[i] = landmarks[i] + initial_base
 
 
   # # 1. create center point list
-  center_list = np.zeros((facet_array.shape[0], 2), dtype=int)
+  # center_list = np.zeros((facet_array.shape[0], 2), dtype=int)
   center_list = []
   for i in range(facet_array.shape[0]):
 
-      A = (new_landmarks[facet_array[i][0]][0], new_landmarks[facet_array[i][0]][1])
-      B = (new_landmarks[facet_array[i][1]][0], new_landmarks[facet_array[i][1]][1])
-      C = (new_landmarks[facet_array[i][2]][0], new_landmarks[facet_array[i][2]][1])
-      mean_p = (new_landmarks[facet_array[i][0]] + new_landmarks[facet_array[i][1]] + new_landmarks[facet_array[i][2]]) / 3
+      A = (landmarks[facet_array[i][0]][0], landmarks[facet_array[i][0]][1])
+      B = (landmarks[facet_array[i][1]][0], landmarks[facet_array[i][1]][1])
+      C = (landmarks[facet_array[i][2]][0], landmarks[facet_array[i][2]][1])
+      mean_p = (landmarks[facet_array[i][0]] + landmarks[facet_array[i][1]] + landmarks[facet_array[i][2]]) / 3
 
-      cv2.line(output, A, B, (255, 255, 255), 2, 0)
-      cv2.line(output, B, C, (255, 255, 255), 2, 0)
-      cv2.line(output, C, A, (255, 255, 255), 2, 0)
+      cv2.line(center_image, A, B, (255, 255, 255), 2, 0)
+      cv2.line(center_image, B, C, (255, 255, 255), 2, 0)
+      cv2.line(center_image, C, A, (255, 255, 255), 2, 0)
 
-      pos = (mean_p[0], mean_p[1])
-      cv2.circle(output, pos, 1, (0,0,255), thickness=2)
+      pos = (int(mean_p[0]), int(mean_p[1]))
+      cv2.circle(center_image, pos, 1, (0,0,255), thickness=2)
       center_list.append( mean_p )
 
-  cv2.imwrite(input_fullpath + "/" + filename + "_center_location.png", output)
+  # cv2.imwrite(input_fullpath + "/" + filename + "_center_location.png", center_image)
   center_list = np.array(center_list, dtype=int)
 
 
 
   # # 2. apply kd-tree
   all_pixel = [] 
-  for y in range(output.shape[0]):
-    for x in range(output.shape[1]):
+  for y in range(center_image.shape[0]):
+    for x in range(center_image.shape[1]):
       point = [x, y]
       all_pixel.append(point)
 
@@ -478,12 +511,13 @@ def kd_tree(image, input_fullpath, filename,  landmarks, facet_array, num):
       nbrs_list[y][x] = ind[nbrs_list.shape[1]*y + x]
 
   print("done!!")
-  return center_list, nbrs_list
+  return center_image, center_list, nbrs_list
 
 
 
 
-def calculate_weight(image, input_fullpath, filename, landmarks, facet_array, mask, nbrs_list):
+# def calculate_weight(image, input_fullpath, filename, landmarks, facet_array, mask, nbrs_list):
+def calculate_weight(image, landmarks, facet_array, mask, nbrs_list):
   """
   calculate each point weight 
 
@@ -495,33 +529,33 @@ def calculate_weight(image, input_fullpath, filename, landmarks, facet_array, ma
 
   print("start calculate each point weight  ......")
 
-  # initilaize landmark
-  new_landmarks = landmarks.copy()
-  base = landmarks[27] - landmarks[8]
-  # initial_base = base / 6
-  initial_base = 1.5 * (base / 6)
+  # # initilaize landmark
+  # new_landmarks = landmarks.copy()
+  # base = landmarks[27] - landmarks[8]
+  # # initial_base = base / 6
+  # initial_base = 1.5 * (base / 6)
 
-  for i in range(new_landmarks.shape[0]) :
-    if(i == 17 or i == 19 or i == 24 or i == 26):
-      new_landmarks[i] = landmarks[i] + initial_base
+  # for i in range(new_landmarks.shape[0]) :
+  #   if(i == 17 or i == 19 or i == 24 or i == 26):
+  #     landmarks[i] = landmarks[i] + initial_base
 
 
   # prepare array to export weight
-  output = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.float32)
+  # output = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.float32)
   weight = np.zeros((image.shape[0], image.shape[1], 4), dtype=np.float32)
 
-  for y in range(output.shape[0]):
+  for y in range(weight.shape[0]):
 
-    h = output.shape[0]
+    h = weight.shape[0]
     per = float(y+1) / float(h) * 100
     sys.stdout.write("\r%d" % per + " [%]")
     sys.stdout.flush()
 
-    for x in range(output.shape[1]):
+    for x in range(weight.shape[1]):
 
 
       # apply mask
-      if(mask[y][x]==1):
+      if(mask[y][x]!=0):
 
         flag = 1
         for i in range(nbrs_list.shape[2]):
@@ -530,9 +564,9 @@ def calculate_weight(image, input_fullpath, filename, landmarks, facet_array, ma
           if(flag == 1):
             # find triangle that includs (y, x)
             nearest_face_num = nbrs_list[y][x][i]
-            a = np.array([new_landmarks[facet_array[nearest_face_num][0]][1], new_landmarks[facet_array[nearest_face_num][0]][0], 0], dtype=np.float32)
-            b = np.array([new_landmarks[facet_array[nearest_face_num][1]][1], new_landmarks[facet_array[nearest_face_num][1]][0], 0], dtype=np.float32)
-            c = np.array([new_landmarks[facet_array[nearest_face_num][2]][1], new_landmarks[facet_array[nearest_face_num][2]][0], 0], dtype=np.float32)
+            a = np.array([landmarks[facet_array[nearest_face_num][0]][1], landmarks[facet_array[nearest_face_num][0]][0], 0], dtype=np.float32)
+            b = np.array([landmarks[facet_array[nearest_face_num][1]][1], landmarks[facet_array[nearest_face_num][1]][0], 0], dtype=np.float32)
+            c = np.array([landmarks[facet_array[nearest_face_num][2]][1], landmarks[facet_array[nearest_face_num][2]][0], 0], dtype=np.float32)
 
             p = np.array([y, x, 0], dtype=np.float32)
 
@@ -555,16 +589,16 @@ def calculate_weight(image, input_fullpath, filename, landmarks, facet_array, ma
             # if find triangle, calculate weight
             if(cross_1[2] <= 0 and cross_2[2] <= 0 and cross_3[2] <= 0):
               P = np.array([int(y), int(x)])
-              w = barycentric_weight(new_landmarks, facet_array[nearest_face_num], P)
-              output[y][x] = (w[0], w[1], w[2])
+              w = barycentric_weight(landmarks, facet_array[nearest_face_num], P)
+              # output[y][x] = (w[0], w[1], w[2])
               weight[y][x] = (w[0], w[1], w[2], nearest_face_num)
               flag = 0
 
 
             elif(cross_1[2] >= 0 and cross_2[2] >= 0 and cross_3[2] >= 0 and flag):
               P = np.array([int(y), int(x)])
-              w = barycentric_weight(new_landmarks, facet_array[nearest_face_num], P)
-              output[y][x] = (w[0], w[1], w[2])
+              w = barycentric_weight(landmarks, facet_array[nearest_face_num], P)
+              # output[y][x] = (w[0], w[1], w[2])
               weight[y][x] = (w[0], w[1], w[2], nearest_face_num)
               flag = 0
 
@@ -574,9 +608,9 @@ def calculate_weight(image, input_fullpath, filename, landmarks, facet_array, ma
       else:
         continue
 
-  pil_output = Image.fromarray((output*255).astype(np.uint8))
-  pil_output.save(input_fullpath + "/" + filename + "_weight.png")
-  np.save(input_fullpath + "/" + filename + "_weight_array.npy", weight)
+  # pil_output = Image.fromarray((output*255).astype(np.uint8))
+  # pil_output.save(input_fullpath + "/" + filename + "_weight.png")
+  # np.save(input_fullpath + "/" + filename + "_weight_array.npy", weight)
 
   print(" ")
   print("done!!")
@@ -639,7 +673,7 @@ def main():
   image = cv2.imread(argvs[1])
 
   detector = dlib.get_frontal_face_detector() #Face detector
-  predictor = dlib.shape_predictor(argvs[2]) #Landmark identifier. Set the filename to whatever you named the downloaded file
+  predictor = dlib.shape_predictor(argvs[2]) #landmark identifier. Set the filename to whatever you named the downloaded file
 
 
   # apply face landmark detection

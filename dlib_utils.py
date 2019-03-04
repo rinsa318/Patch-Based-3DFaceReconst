@@ -2,10 +2,10 @@
  ----------------------------------------------------
   @Author: tsukasa
   @Affiliation: Waseda University
-  @Email: n1.n2n3__n4n5@ruri.waseda.jp
+  @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-18 23:14:59
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-02 22:04:43
+  @Last Modified time: 2019-03-05 08:18:26
  ----------------------------------------------------
 
   Usage:
@@ -389,7 +389,7 @@ def draw_each_triangles(image, landmarks, facet_array, facet_color, wirecolor=(2
   output_triangle = image.copy()
   output_mesh = image.copy()
 
-  tri_color_new = np.load(facet_color)
+  tri_color_new = facet_color.copy()
   # print(tri_color_new.shape)
 
   # new_landmarks = landmarks.copy()

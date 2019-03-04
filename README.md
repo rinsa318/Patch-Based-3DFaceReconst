@@ -11,15 +11,16 @@ SIGGRAPH Poster 2016
 <img src="./temp/figure1.png" width=100%>
 
 ## Environment
-Ubuntu 16.04  
-Python2.7(Anaconda2-5.2.0)
+Ubuntu 18.04  
+Python3.6(Anaconda3-5.2.0)
 
 
 
 ## Dependency
 
-+ OpenCV
++ OpenCV3
 + Dlib
+
 + [shape_predictor_68_face_landmarks.dat](http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 "")
 
 

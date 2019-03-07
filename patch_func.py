@@ -5,7 +5,7 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2019-03-04 16:52:33
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-05 08:06:45
+  @Last Modified time: 2019-03-05 10:06:01
  ----------------------------------------------------
 
 
@@ -279,26 +279,20 @@ def reproduce_image(output_image, data_array, distance_array, position_array, pa
   for k in range(distance_array.shape[0]):
 
     # set postion for input
-    ip_upper_left = np.zeros(2, dtype=np.int64)
-    ip_bottom_right = np.zeros(2, dtype=np.int64)
-    ip_upper_left[0] = position_array[k][0]
-    ip_upper_left[1] = position_array[k][1]
-    ip_bottom_right[0] = position_array[k][0] + patch_size
-    ip_bottom_right[1] = position_array[k][1] + patch_size
+    ip_upper_left = np.array((position_array[k][0], position_array[k][1]), dtype=np.int64)
+    ip_bottom_right = np.array((position_array[k][0]+patch_size, position_array[k][1]+patch_size), dtype=np.int64)
+
 
     # find closest patch
     min_number = np.argmin(distance_array[k])
 
 
     # set position for cosest path
-    dp_upper_left = np.zeros(2, dtype=np.int64)
-    dp_bottom_right = np.zeros(2, dtype=np.int64)
-    dp_upper_left[0] = patch_position_array[k][min_number][0]
-    dp_upper_left[1] = patch_position_array[k][min_number][1]
-    dp_bottom_right[0] = patch_position_array[k][min_number][0] + patch_size
-    dp_bottom_right[1] = patch_position_array[k][min_number][1] + patch_size
+    dp_upper_left = np.array((patch_position_array[k][min_number][0], patch_position_array[k][min_number][1]), dtype=np.int64)
+    dp_bottom_right = np.array((patch_position_array[k][min_number][0]+patch_size, patch_position_array[k][min_number][1]+patch_size), dtype=np.int64)
 
 
+    # set for new image
     outpatch = output_image[ip_upper_left[0]:ip_bottom_right[0], ip_upper_left[1]:ip_bottom_right[1]]
     datapatch = data_array[min_number][dp_upper_left[0]:dp_bottom_right[0], dp_upper_left[1]:dp_bottom_right[1]]
 
@@ -312,10 +306,10 @@ def reproduce_image(output_image, data_array, distance_array, position_array, pa
             outpatch[i][j] = outpatch[i][j]/2 + datapatch[i][j]/2
           
           else:
-            if(outpatch[i][j] == 0):
+            if(outpatch[i][j] == 0 and datapatch[i][j] != 0):
               outpatch[i][j] = datapatch[i][j]
 
-            if(datapatch[i][j] == 0):
+            if(datapatch[i][j] == 0 and outpatch[i][j] != 0):
               continue
 
           output_image[ip_upper_left[0]:ip_bottom_right[0], ip_upper_left[1]:ip_bottom_right[1]] = outpatch
@@ -348,24 +342,20 @@ def reproduce_temp_image(output_image, data_array, distance_array, position_arra
 
 
   # set postion for input
-  ip_upper_left = np.zeros(2, dtype=np.int64)
-  ip_bottom_right = np.zeros(2, dtype=np.int64)
-  ip_upper_left[0] = position_array[0]
-  ip_upper_left[1] = position_array[1]
-  ip_bottom_right[0] = position_array[0] + patch_size
-  ip_bottom_right[1] = position_array[1] + patch_size
+  ip_upper_left = np.array((position_array[0], position_array[1]), dtype=np.int64)
+  ip_bottom_right = np.array((position_array[0]+patch_size, position_array[1]+patch_size), dtype=np.int64)
+
+
+  # find closest patch
+  min_number = np.argmin(distance_array)
 
 
   # set position for cosest path
-  min_number = np.argmin(distance_array)
-  dp_upper_left = np.zeros(2, dtype=np.int64)
-  dp_bottom_right = np.zeros(2, dtype=np.int64)
-  dp_upper_left[0] = patch_position_array[min_number][0]
-  dp_upper_left[1] = patch_position_array[min_number][1]
-  dp_bottom_right[0] = patch_position_array[min_number][0] + patch_size
-  dp_bottom_right[1] = patch_position_array[min_number][1] + patch_size
+  dp_upper_left = np.array((patch_position_array[min_number][0], patch_position_array[min_number][1]), dtype=np.int64)
+  dp_bottom_right = np.array((patch_position_array[min_number][0]+patch_size, patch_position_array[min_number][1]+patch_size), dtype=np.int64)
 
 
+  # set for new image
   outpatch = output_image[ip_upper_left[0]:ip_bottom_right[0], ip_upper_left[1]:ip_bottom_right[1]]
   datapatch = data_array[min_number][dp_upper_left[0]:dp_bottom_right[0], dp_upper_left[1]:dp_bottom_right[1]]
 
@@ -398,10 +388,10 @@ def reproduce_temp_image(output_image, data_array, distance_array, position_arra
           outpatch[i][j] = outpatch[i][j]/2 + datapatch[i][j]/2
         
         else:
-          if(outpatch[i][j][0] == 0 and outpatch[i][j][1] == 0 and outpatch[i][j][2] ==0 or datapatch[i][j][0] != 0 or datapatch[i][j][1] != 0 or datapatch[i][j][2] != 0):
+          if(outpatch[i][j][0] == 0 and outpatch[i][j][1] == 0 and outpatch[i][j][2] ==0):
             outpatch[i][j] = datapatch[i][j]
           
-          if(datapatch[i][j][0] == 0 and datapatch[i][j][1] == 0 and datapatch[i][j][2] ==0 or outpatch[i][j][0] != 0 or outpatch[i][j][1] != 0 or outpatch[i][j][2] != 0):
+          if(datapatch[i][j][0] == 0 and datapatch[i][j][1] == 0 and datapatch[i][j][2] ==0):
             continue
         
         output_image[ip_upper_left[0]:ip_bottom_right[0], ip_upper_left[1]:ip_bottom_right[1]] = outpatch

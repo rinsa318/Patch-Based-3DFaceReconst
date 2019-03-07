@@ -5,7 +5,7 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-01 05:29:38
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-05 08:18:30
+  @Last Modified time: 2019-03-07 12:21:00
  ----------------------------------------------------
 
   Usage:
@@ -42,7 +42,7 @@ import dataset_func as da
 
 
 
-def getmask(image, predictor_path):
+def get_mask(image, predictor_path):
 
   ### apply face landmark detection
   detector = dlib.get_frontal_face_detector() #Face detector
@@ -196,6 +196,16 @@ def normalize(normal, mask):
 
 
 
+def export_argv(outpath, argv):
+
+  with open(outpath, "w" ) as f:
+    f.write("Executed command\n")
+    f.write("-->\n")
+    f.write("\n")
+
+    for i in range(len(argv)):
+      f.write("{} ".format(str(argv[i])))
+
 
 
 def main():
@@ -210,7 +220,9 @@ def main():
   predictor_path = argvs[2]
   output_path, filename_ext = os.path.split(input_path)
   filename, ext = os.path.splitext(filename_ext)
+  export_argv("{0}/{1}_executed_command.txt".format(output_path, filename), argvs)
   
+
   ### load data
   facet_array = np.load("./facest_list.npy")
   triangle_color_array = np.load("./triangle_color.npy")
@@ -228,8 +240,7 @@ def main():
   ## 2. load input and make mask(before normalize)
   #################
   init_image = cv2.imread(input_path, 1)
-  # input_image = cv2.cvtColor(init_image, cv2.COLOR_BGR2GRAY) / 255.0
-  init_mask, init_landmark = getmask(init_image, predictor_path)
+  init_mask, init_landmark = get_mask(init_image, predictor_path)
   utils.export_landmark(init_landmark, "{0}/{1}_init_landmark.txt".format(output_path, filename))
   cv2.imwrite("{0}/{1}_init_mask.png".format(output_path, filename), init_mask)
 
@@ -242,7 +253,7 @@ def main():
   ### normalize
   image_normalized = normalize_rot_scale(init_image, init_landmark, rgb_data, fp_data)
   input_image = cv2.cvtColor(init_image, cv2.COLOR_BGR2GRAY) / 255.0
-  mask, landmark = getmask(image_normalized, predictor_path)
+  mask, landmark = get_mask(image_normalized, predictor_path)
   utils.export_landmark(landmark, "{0}/{1}_landmark.txt".format(output_path, filename))
   cv2.imwrite("{0}/{1}_mask.png".format(output_path, filename), mask)
   cv2.imwrite("{0}/{1}_normalized_input.png".format(output_path, filename), image_normalized)
@@ -250,7 +261,7 @@ def main():
 
 
   ### calculate_weight
-  center_image, center_list, nbrs_list = utils.kd_tree(image_normalized, landmark, facet_array, 18)
+  center_image, center_list, nbrs_list = utils.kd_tree(image_normalized, landmark, facet_array, 20)
   mesh, tri_mesh = utils.draw_each_triangles(image_normalized, landmark, facet_array, triangle_color_array)
   weight = utils.calculate_weight(tri_mesh, landmark, facet_array, mask, nbrs_list)
   np.save("{0}/{1}_weight.npy".format(output_path, filename), weight)

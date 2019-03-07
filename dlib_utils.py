@@ -5,7 +5,7 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-18 23:14:59
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-05 08:18:26
+  @Last Modified time: 2019-03-07 12:01:05
  ----------------------------------------------------
 
   Usage:
@@ -521,7 +521,7 @@ def calculate_weight(image, landmarks, facet_array, mask, nbrs_list):
   """
   calculate each point weight 
 
-  1. find triangles that is incuding point (x, y) from nearest face(kd-tree)
+  1. find triangles that is inculding point (x, y) from nearest face(kd-tree)
   2. calculate barycentric weight
   3. export nearest face index
 
@@ -606,11 +606,34 @@ def calculate_weight(image, landmarks, facet_array, mask, nbrs_list):
             continue
 
       else:
-        continue
+        # continue
 
-  # pil_output = Image.fromarray((output*255).astype(np.uint8))
-  # pil_output.save(input_fullpath + "/" + filename + "_weight.png")
-  # np.save(input_fullpath + "/" + filename + "_weight_array.npy", weight)
+
+        # find triangle that includs (y, x)
+        nearest_face_num = nbrs_list[y][x][0]
+        a = np.array([landmarks[facet_array[nearest_face_num][0]][1], landmarks[facet_array[nearest_face_num][0]][0], 0], dtype=np.float32)
+        b = np.array([landmarks[facet_array[nearest_face_num][1]][1], landmarks[facet_array[nearest_face_num][1]][0], 0], dtype=np.float32)
+        c = np.array([landmarks[facet_array[nearest_face_num][2]][1], landmarks[facet_array[nearest_face_num][2]][0], 0], dtype=np.float32)
+
+        p = np.array([y, x, 0], dtype=np.float32)
+
+        ap = a - p
+        bp = b - p
+        cp = c - p
+
+        ca = a - c
+        ab = b - a
+        bc = c - b
+
+        cross_1 = np.cross(ca, cp)
+        cross_2 = np.cross(ab, ap)
+        cross_3 = np.cross(bc, bp)
+
+
+        P = np.array([int(y), int(x)])
+        w = barycentric_weight(landmarks, facet_array[nearest_face_num], P)
+        weight[y][x] = (w[0], w[1], w[2], nearest_face_num)
+
 
   print(" ")
   print("done!!")

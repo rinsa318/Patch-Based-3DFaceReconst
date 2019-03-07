@@ -5,11 +5,11 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-01 05:29:38
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-07 13:35:57
+  @Last Modified time: 2019-03-07 21:02:43
  ----------------------------------------------------
 
   Usage:
-   python main.py argvs[1] argvs[2] argvs[3] argvs[4]
+   python main.py argvs[1] argvs[2] argvs[3]...
   
    argvs[1]  :  <path to input image>
    argvs[2]  :  <dlib_predictor_path> --> .dat file
@@ -102,7 +102,6 @@ def normalize_rot_scale(image, fp, data_array, fp_array):
   angle = []
   scale = []
 
-
   for i in range(data_array.shape[0]):
     data_eye_distance = fp_array[i][42] - fp_array[i][39]
     data_length = np.linalg.norm(data_eye_distance)
@@ -112,12 +111,14 @@ def normalize_rot_scale(image, fp, data_array, fp_array):
     angle.append( angle_temp )
     scale.append( scale_temp )
 
+
+
   ### define rot_angle, and scale_factor
   angle = np.array(angle, dtype=np.float32)
   scale = np.array(scale, dtype=np.float32)
   rot_angle = (np.mean(angle) / np.pi) * 180.0
   scale_factor = np.mean(scale)
-  
+
 
   ### roteta and zoom in/out for normalize
   size = tuple([image.shape[1], image.shape[0]])
@@ -126,7 +127,22 @@ def normalize_rot_scale(image, fp, data_array, fp_array):
   img_rot = cv2.warpAffine(image, rotation_matrix, size, flags=cv2.INTER_CUBIC)
 
 
-  return img_rot
+  ### crop image or re-zoom image
+  if(scale_factor < 1.0):
+    y_up = center[1] - (image.shape[0] / 2.0 * scale_factor)
+    y_bottom = center[1] + (image.shape[0] / 2.0 * scale_factor)
+    x_up = center[0] - (image.shape[1] / 2.0 * scale_factor)
+    x_bottom = center[0] + (image.shape[1] / 2.0 * scale_factor)
+    dst = img_rot[int(y_up):int(y_bottom), int(x_up):int(x_bottom)]
+    return dst
+
+  else:
+    y_up = center[1] - (image.shape[0] / 2.0 / scale_factor)
+    y_bottom = center[1] + (image.shape[0] / 2.0 / scale_factor)
+    x_up = center[0] - (image.shape[1] / 2.0 / scale_factor)
+    x_bottom = center[0] + (image.shape[1] / 2.0 / scale_factor)    
+    dst = img_rot[int(y_up):int(y_bottom), int(x_up):int(x_bottom)]
+    return dst
 
 
 
@@ -227,6 +243,7 @@ def main():
   facet_array = np.load("./facest_list.npy")
   triangle_color_array = np.load("./triangle_color.npy")
   rgb_data = np.array(da.load_database("./data/man/rgb_data.txt", bool(0)) / 255.0, dtype=np.float32)
+  rgb_data4ColorNormalize = np.array(da.load_database("./data/man/rgb_data.txt", bool(1)), dtype=np.uint8)
   normal_data = np.array(da.load_database("./data/man/normal_data.txt", bool(1)) / 255.0, dtype=np.float32)
   mask_data = da.load_database("./data/man/mask_data.txt", bool(0))
   fp_data = da.load_fp_database("./data/man/fp_data.txt")
@@ -250,15 +267,17 @@ def main():
   ## 3. normalize input image to fit databaset, and calculate weight
   #################
 
-  ### normalize
-  image_normalized = normalize_rot_scale(init_image, init_landmark, rgb_data, fp_data)
-  input_image = cv2.cvtColor(init_image, cv2.COLOR_BGR2GRAY) / 255.0
-  mask, landmark = get_mask(image_normalized, predictor_path)
+  ### normalize rot zoom
+  image_rot_zoom_normalized = normalize_rot_scale(init_image, init_landmark, rgb_data, fp_data)
+  mask, landmark = get_mask(image_rot_zoom_normalized, predictor_path)
   utils.export_landmark(landmark, "{0}/{1}_landmark.txt".format(output_path, filename))
   cv2.imwrite("{0}/{1}_mask.png".format(output_path, filename), mask)
+  cv2.imwrite("{0}/{1}_rot_zoom_normalized.png".format(output_path, filename), image_rot_zoom_normalized)
+  
+  ### normalized color
+  image_normalized = ct.color_normalize(rgb_data4ColorNormalize, mask_data, image_rot_zoom_normalized, mask)
+  input_image = cv2.cvtColor(image_normalized, cv2.COLOR_BGR2GRAY) / 255.0
   cv2.imwrite("{0}/{1}_normalized_input.png".format(output_path, filename), image_normalized)
-  # normalize_rot(image, mask, landmark, image, mask, landmark)
-
 
   ### calculate_weight
   center_image, center_list, nbrs_list = utils.kd_tree(image_normalized, landmark, facet_array, 20)
@@ -324,20 +343,16 @@ def main():
   normal = normal[:, :, ::-1] # --> (optional) depends on your coordinate system
   normal[:, :, 1] = normal[:, :, 1] * -1 # --> (optional) depends on your coordinate system
 
-
   ### normalize
   n = normalize(normal, mask)
-
 
   ### estimate depth
   depth = nd.comp_depth_4edge(mask, n)
 
-
   ### load albedo or create favarite albedo
   # cv2.imread('''albedp.png'''')
   # albedo = make_albedo(depth)
-  albedo = image_normalized.copy() / 255.0
-
+  albedo = image_rot_zoom_normalized.copy() / 255.0
 
   ### convert depth to ver and tri
   ver, tri = ob.Depth2VerTri(depth, mask)
@@ -351,15 +366,19 @@ def main():
   ###########################
   # 6. exports 2d outputs
   ###########################  
+  ### create depth map
   depth_image = np.array((1.0 - (depth / np.max(depth))) * 255, dtype=np.uint8 )
   depth_image = cv2.cvtColor(depth_image, cv2.COLOR_GRAY2RGB)
+
+  ### combine each result
   bgr_result = cv2.cvtColor(np.array(bgr_result*255, dtype=np.uint8), cv2.COLOR_GRAY2RGB)
   normal_result = np.array(normal_result*255, dtype=np.uint8)
-
-  results = np.hstack( ( init_image, image_normalized) )
+  results = np.hstack( ( image_rot_zoom_normalized, image_normalized) )
   results = np.hstack( ( results, bgr_result) )
   results = np.hstack( ( results, normal_result) )
   results = np.hstack( ( results, depth_image) )
+  
+  ### save
   cv2.imwrite("{0}/{1}_outputs.png".format(output_path, filename), np.array(results, dtype=np.uint8))
   print("save result!!")
 
@@ -372,8 +391,8 @@ def main():
 
 
 argvs = sys.argv
-input_fullpath, failfile_name = os.path.split(argvs[1])
-filename, extention = os.path.splitext(os.path.basename(argvs[1]))
+# input_fullpath, failfile_name = os.path.split(argvs[1])
+# filename, extention = os.path.splitext(os.path.basename(argvs[1]))
 facet_array = np.load("facest_list.npy")
 if(len(argvs) > 3):
   patch_size = int(argvs[3])

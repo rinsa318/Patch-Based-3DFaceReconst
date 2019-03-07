@@ -5,7 +5,7 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-18 23:14:59
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-07 12:01:05
+  @Last Modified time: 2019-03-07 20:49:36
  ----------------------------------------------------
 
   Usage:
@@ -27,10 +27,6 @@ import dlib
 import sys
 import random
 import os
-# from scipy.interpolate import interp1d
-# from scipy.interpolate import splprep, splev
-# from  scipy.interpolate  import  interp1d
-from PIL import Image
 from sklearn.neighbors import NearestNeighbors
 
 
@@ -145,7 +141,7 @@ def visualize_landmark(image, landmarks):
     return output
 
 
-# def create_mask_image(image, landmarks, input_fullpath, filename):
+
 def create_mask(image, landmarks):
   """
   input: image array, landmark array(68 points)
@@ -156,10 +152,7 @@ def create_mask(image, landmarks):
   output = image.copy()
   mask = np.zeros((output.shape[0], output.shape[1]), dtype=np.uint8)
 
-  # base = landmarks[27] - landmarks[8]
-  # initial_base = base / 6
-  # initial_base = 1.5 * (base / 6)
-  
+
   outline = []
   for i in range(17):
     outline.append(landmarks[i])
@@ -173,19 +166,7 @@ def create_mask(image, landmarks):
   outline = np.array(outline, dtype=int)
   outline = outline.reshape((-1, 1, 2))
   cv2.fillPoly(mask, pts =[outline], color=255)
-  # cv2.imwrite(input_fullpath + "/" + filename + "_mask.png", mask)
-  # cv2.imshow("landmark detection result", output)
-  # cv2.waitKey(0)
-  # cv2.destroyAllWindows()
-  # print("save landmark outline image --> mask_image.png")
 
-  # for y in range(mask.shape[0]):
-  #   for x in range(mask.shape[1]):
-
-  #     if(mask[y][x] > 240):
-  #       mask[y][x] = True
-  #     else:
-  #       mask[y][x] = False
 
   return mask
 
@@ -284,34 +265,13 @@ def export_landmark(landmarks, filepath):
 
 
 
-# def landmark_output(landmarks, input_fullpath, filename):
+
 def edit_landmark(landmarks):
   """
   this function can export landmarks as text file
 
   """
  
-  # # # to export pure future point
-  # f = open(input_fullpath + "/" + filename + "_landmark.txt", "w")
-
-  # for i in range(len(landmarks)):
-  #   f.write(str(landmarks[i][0]) + "," + str(landmarks[i][1]) + "\n")
-
-  # base = landmarks[27] - landmarks[8]
-  # initial_base = base / 6
-  # initial_base = 1.5 * (base / 6)
-  
-  # outline = []
-  # for i in range(17):
-  #   outline.append(landmarks[i])
-
-  # outline.append(landmarks[26] + initial_base)
-  # outline.append(landmarks[24] + initial_base)
-  # outline.append(landmarks[19] + initial_base)
-  # outline.append(landmarks[17] + initial_base)
-  # outline.append(landmarks[0])
-
-
   ## to export modified version
   new_landmarks = landmarks.copy()
   base = landmarks[27] - landmarks[8]
@@ -322,12 +282,7 @@ def edit_landmark(landmarks):
     if(i == 17 or i == 19 or i == 24 or i == 26):
       new_landmarks[i] = landmarks[i] + initial_base
 
-  # f = open(input_fullpath + "/" + filename + "_modified_landmark.txt", "w")
 
-  # for i in range(len(new_landmarks)):
-  #   f.write(str(new_landmarks[i][0]) + "," + str(new_landmarks[i][1]) + "\n")
-
-  # print("save landmark --> output_landmark.txt")
 
   return new_landmarks
 
@@ -383,7 +338,6 @@ def create_facet_list(landmarks, pt1, pt2, pt3):
 
 
 
-# def draw_each_triangles(image, input_fullpath, filename, landmarks, facet_array, facet_color, wirecolor=(255, 255, 255)):
 def draw_each_triangles(image, landmarks, facet_array, facet_color, wirecolor=(255, 255, 255)):
 
   output_triangle = image.copy()
@@ -392,16 +346,7 @@ def draw_each_triangles(image, landmarks, facet_array, facet_color, wirecolor=(2
   tri_color_new = facet_color.copy()
   # print(tri_color_new.shape)
 
-  # new_landmarks = landmarks.copy()
-  # base = landmarks[27] - landmarks[8]
-  # # initial_base = base / 6 + ((base / 6) / 6)
-  # initial_base = 1.5 * (base / 6)
 
-  # for i in range(new_landmarks.shape[0]) :
-  #   if(i == 17 or i == 19 or i == 24 or i == 26):
-  #     new_landmarks[i] = landmarks[i] + initial_base
-
-  # tri_color = []
   for i in range(facet_array.shape[0]):
 
       # # for mesh
@@ -429,16 +374,12 @@ def draw_each_triangles(image, landmarks, facet_array, facet_color, wirecolor=(2
       # cv2.putText(output_triangle, str(i+1), center, cv2.FONT_HERSHEY_PLAIN, 0.75, (255,255,255), 1, cv2.LINE_AA)
 
 
-  # cv2.imwrite(input_fullpath + "/" + filename + "_mesh.png", output_mesh)
-  # cv2.imwrite(input_fullpath + "/" + filename + "_triangle.png", output_triangle)
-  # print("drew each triangles and mesh")
 
 
   return output_mesh, output_triangle
 
 
 
-# def kd_tree(image, input_fullpath, filename,  landmarks, facet_array, num):
 def kd_tree(image, landmarks, facet_array, num):
 
   """
@@ -455,16 +396,6 @@ def kd_tree(image, landmarks, facet_array, num):
   center_image = image.copy()
 
 
-
-  # # initilize fp list
-  # new_landmarks = landmarks.copy()
-  # base = landmarks[27] - landmarks[8]
-  # # initial_base = base / 6
-  # initial_base = 1.5 * (base / 6)
-
-  # for i in range(new_landmarks.shape[0]) :
-  #   if(i == 17 or i == 19 or i == 24 or i == 26):
-  #     new_landmarks[i] = landmarks[i] + initial_base
 
 
   # # 1. create center point list
@@ -516,7 +447,6 @@ def kd_tree(image, landmarks, facet_array, num):
 
 
 
-# def calculate_weight(image, input_fullpath, filename, landmarks, facet_array, mask, nbrs_list):
 def calculate_weight(image, landmarks, facet_array, mask, nbrs_list):
   """
   calculate each point weight 
@@ -529,15 +459,6 @@ def calculate_weight(image, landmarks, facet_array, mask, nbrs_list):
 
   print("start calculate each point weight  ......")
 
-  # # initilaize landmark
-  # new_landmarks = landmarks.copy()
-  # base = landmarks[27] - landmarks[8]
-  # # initial_base = base / 6
-  # initial_base = 1.5 * (base / 6)
-
-  # for i in range(new_landmarks.shape[0]) :
-  #   if(i == 17 or i == 19 or i == 24 or i == 26):
-  #     landmarks[i] = landmarks[i] + initial_base
 
 
   # prepare array to export weight
@@ -606,33 +527,33 @@ def calculate_weight(image, landmarks, facet_array, mask, nbrs_list):
             continue
 
       else:
-        # continue
+        continue
 
 
-        # find triangle that includs (y, x)
-        nearest_face_num = nbrs_list[y][x][0]
-        a = np.array([landmarks[facet_array[nearest_face_num][0]][1], landmarks[facet_array[nearest_face_num][0]][0], 0], dtype=np.float32)
-        b = np.array([landmarks[facet_array[nearest_face_num][1]][1], landmarks[facet_array[nearest_face_num][1]][0], 0], dtype=np.float32)
-        c = np.array([landmarks[facet_array[nearest_face_num][2]][1], landmarks[facet_array[nearest_face_num][2]][0], 0], dtype=np.float32)
+        # # find triangle that includs (y, x)
+        # nearest_face_num = nbrs_list[y][x][0]
+        # a = np.array([landmarks[facet_array[nearest_face_num][0]][1], landmarks[facet_array[nearest_face_num][0]][0], 0], dtype=np.float32)
+        # b = np.array([landmarks[facet_array[nearest_face_num][1]][1], landmarks[facet_array[nearest_face_num][1]][0], 0], dtype=np.float32)
+        # c = np.array([landmarks[facet_array[nearest_face_num][2]][1], landmarks[facet_array[nearest_face_num][2]][0], 0], dtype=np.float32)
 
-        p = np.array([y, x, 0], dtype=np.float32)
+        # p = np.array([y, x, 0], dtype=np.float32)
 
-        ap = a - p
-        bp = b - p
-        cp = c - p
+        # ap = a - p
+        # bp = b - p
+        # cp = c - p
 
-        ca = a - c
-        ab = b - a
-        bc = c - b
+        # ca = a - c
+        # ab = b - a
+        # bc = c - b
 
-        cross_1 = np.cross(ca, cp)
-        cross_2 = np.cross(ab, ap)
-        cross_3 = np.cross(bc, bp)
+        # cross_1 = np.cross(ca, cp)
+        # cross_2 = np.cross(ab, ap)
+        # cross_3 = np.cross(bc, bp)
 
 
-        P = np.array([int(y), int(x)])
-        w = barycentric_weight(landmarks, facet_array[nearest_face_num], P)
-        weight[y][x] = (w[0], w[1], w[2], nearest_face_num)
+        # P = np.array([int(y), int(x)])
+        # w = barycentric_weight(landmarks, facet_array[nearest_face_num], P)
+        # weight[y][x] = (w[0], w[1], w[2], nearest_face_num)
 
 
   print(" ")

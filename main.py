@@ -5,11 +5,11 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-01 05:29:38
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-07 12:21:00
+  @Last Modified time: 2019-03-07 13:35:57
  ----------------------------------------------------
 
   Usage:
-   python main.py argvs[1] argvs[2] argvs[3]...
+   python main.py argvs[1] argvs[2] argvs[3] argvs[4]
   
    argvs[1]  :  <path to input image>
    argvs[2]  :  <dlib_predictor_path> --> .dat file

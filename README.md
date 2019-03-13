@@ -8,7 +8,7 @@ SIGGRAPH Poster 2016
 [[Paper](http://delivery.acm.org/10.1145/2950000/2945102/a24-nozawa.pdf?ip=133.3.201.13&id=2945102&acc=ACTIVE%20SERVICE&key=D2341B890AD12BFE%2EE7C54C29BAE894E8%2E4D4702B0C3E38B35%2E4D4702B0C3E38B35&__acm__=1543305734_bba8c0d8e3fcca4cdadddb6d07e78b6d "Paper")]  
 
 <p align="center">
-  <img src="./temp/figure1.png" width=80%>
+  <img src="./temp/figure1.png" width=90%>
 </p>
   
 ## Environment

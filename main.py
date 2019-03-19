@@ -5,7 +5,7 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-01 05:29:38
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-19 14:18:09
+  @Last Modified time: 2019-03-19 18:45:22
  ----------------------------------------------------
 
   Usage:
@@ -353,10 +353,8 @@ def main():
   ### combine each result
   bgr_result = cv2.cvtColor(np.array(bgr_result*255, dtype=np.uint8), cv2.COLOR_GRAY2RGB)
   normal_result = np.array(normal_result*255, dtype=np.uint8)
-  results = np.hstack( ( image_rot_zoom_normalized, image_normalized) )
-  results = np.hstack( ( results, bgr_result) )
-  results = np.hstack( ( results, normal_result) )
-  results = np.hstack( ( results, depth_image) )
+  results = np.hstack( ( image_rot_zoom_normalized, image_normalized, bgr_result, normal_result, depth_image) )
+
   
   ### save
   cv2.imwrite("{0}/{1}_outputs.png".format(output_path, filename), np.array(results, dtype=np.uint8))

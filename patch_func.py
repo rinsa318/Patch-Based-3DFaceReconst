@@ -5,7 +5,7 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2019-03-04 16:52:33
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-05 10:06:01
+  @Last Modified time: 2019-03-19 14:12:22
  ----------------------------------------------------
 
 
@@ -172,13 +172,14 @@ def find_optimal_patch(input_img, weight, facet_array, data_array, normal_data_a
 
   for i in range(0, input_img.shape[0], patch_size - overlap_size):
 
-    # show progress
+    # # show progress
     h = input_img.shape[0] / (patch_size - overlap_size)
     w = i/(patch_size - overlap_size) + 1
     # print(str(i/(patch_size - overlap_size) + 1) + " / " + str(h))
-    per = float(w) / float(h) * 100
-    sys.stdout.write("\r%d" % per + " [%]")
-    sys.stdout.flush()
+    # per = float(w) / float(h) * 100
+    # sys.stdout.write("\r%d" % per + " [%]")
+    # sys.stdout.flush()
+    progress_bar(w, h)
 
     if(i+patch_size > input_img.shape[0] or i > input_img.shape[0]):
       continue
@@ -267,7 +268,7 @@ def find_optimal_patch(input_img, weight, facet_array, data_array, normal_data_a
 
 
 
-  print(" ")
+  print("\n")
   return np.array(distance, dtype=np.float32), np.array(position, dtype=np.float32), np.array(position_patch, dtype=np.int64)
 
 
@@ -277,6 +278,8 @@ def reproduce_image(output_image, data_array, distance_array, position_array, pa
 
 
   for k in range(distance_array.shape[0]):
+
+    progress_bar(k, distance_array.shape[0] - 1)
 
     # set postion for input
     ip_upper_left = np.array((position_array[k][0], position_array[k][1]), dtype=np.int64)
@@ -332,6 +335,7 @@ def reproduce_image(output_image, data_array, distance_array, position_array, pa
           
           output_image[ip_upper_left[0]:ip_bottom_right[0], ip_upper_left[1]:ip_bottom_right[1]] = outpatch
 
+  print("")
 
   return output_image
 
@@ -398,3 +402,20 @@ def reproduce_temp_image(output_image, data_array, distance_array, position_arra
 
 
   return output_image
+
+
+
+def progress_bar(n, N):
+
+  '''
+  print current progress
+  '''
+
+  percent = float(n) / float(N) * 100
+
+  ## convert percent to bar
+  current = "#" * int(percent//2)
+  # current = "=" * int(percent//2)
+  remain = " " * int(100/2-int(percent//2))
+  bar = "|{}{}|".format(current, remain)# + "#" * int(percent//2) + " " * int(100/2-int(percent//2)) + "|"
+  print("\r{}:{:3.0f}[%]".format(bar, percent), end="", flush=True)

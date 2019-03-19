@@ -5,7 +5,7 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-01 05:29:38
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-07 21:02:43
+  @Last Modified time: 2019-03-19 14:18:09
  ----------------------------------------------------
 
   Usage:
@@ -67,29 +67,6 @@ def get_mask(image, predictor_path):
 
 
 
-## on going
-def normalize_color(image, mask, data_array, mask_array):
-
-  ### data should be have 1 channel
-  edit_data = np.zeros((data_array.shape[0], data_array.shape[1], data_array.shape[2]), dtype=np.uint8)
-  
-
-  for i in range(data_array.shape[0]):
-
-    ### 3 channel
-    transfered_image = ct.colortransfer(image, mask, data_array[i], mask_array[i])
-    transfered_image[mask_array[i]!=255] = [0, 0, 0] if transfered_image.ndim == 3 else 0
-
-    ### convert to 1 channel
-    edit_data[i]  = cv2.cvtColor(transfered_image, cv2.COLOR_BGR2GRAY)
-
-    cv2.imshow("input", cv2.cvtColor(data_array[i], cv2.COLOR_BGR2GRAY))
-    cv2.imshow("trans", edit_data[i])
-    cv2.waitKey(0)
-
-  return edit_data
-
-
 
 
 def normalize_rot_scale(image, fp, data_array, fp_array):
@@ -118,6 +95,7 @@ def normalize_rot_scale(image, fp, data_array, fp_array):
   scale = np.array(scale, dtype=np.float32)
   rot_angle = (np.mean(angle) / np.pi) * 180.0
   scale_factor = np.mean(scale)
+  print("scale: {}".format(scale_factor))
 
 
   ### roteta and zoom in/out for normalize
@@ -125,7 +103,7 @@ def normalize_rot_scale(image, fp, data_array, fp_array):
   center = tuple([int(size[0]/2), int(size[1]/2)])
   rotation_matrix = cv2.getRotationMatrix2D(center, -1*rot_angle, scale_factor)
   img_rot = cv2.warpAffine(image, rotation_matrix, size, flags=cv2.INTER_CUBIC)
-
+  print("rotation: \n{}".format(rotation_matrix))
 
   ### crop image or re-zoom image
   if(scale_factor < 1.0):
@@ -143,8 +121,6 @@ def normalize_rot_scale(image, fp, data_array, fp_array):
     x_bottom = center[0] + (image.shape[1] / 2.0 / scale_factor)    
     dst = img_rot[int(y_up):int(y_bottom), int(x_up):int(x_bottom)]
     return dst
-
-
 
 
 
@@ -247,9 +223,10 @@ def main():
   normal_data = np.array(da.load_database("./data/man/normal_data.txt", bool(1)) / 255.0, dtype=np.float32)
   mask_data = da.load_database("./data/man/mask_data.txt", bool(0))
   fp_data = da.load_fp_database("./data/man/fp_data.txt")
+  print("input information\n-->")
   print("rgb data size: {}".format(rgb_data.shape))
   print("normal data size: {}".format(normal_data.shape))
-  print("fp data size: {}".format(fp_data.shape))
+  print("fp data size: {}\n".format(fp_data.shape))
 
 
 
@@ -266,6 +243,7 @@ def main():
   #################
   ## 3. normalize input image to fit databaset, and calculate weight
   #################
+  print("normalize input image to fit databaset --> scale, rotation, color")
 
   ### normalize rot zoom
   image_rot_zoom_normalized = normalize_rot_scale(init_image, init_landmark, rgb_data, fp_data)
@@ -278,6 +256,7 @@ def main():
   image_normalized = ct.color_normalize(rgb_data4ColorNormalize, mask_data, image_rot_zoom_normalized, mask)
   input_image = cv2.cvtColor(image_normalized, cv2.COLOR_BGR2GRAY) / 255.0
   cv2.imwrite("{0}/{1}_normalized_input.png".format(output_path, filename), image_normalized)
+  print("done!!\n")
 
   ### calculate_weight
   center_image, center_list, nbrs_list = utils.kd_tree(image_normalized, landmark, facet_array, 20)
@@ -305,9 +284,10 @@ def main():
   
   ### apply patch tiling
   dis, pos, patch_pos = pa.find_optimal_patch(input_image, weight, facet_array, rgb_data, normal_data, fp_data, patch_size, overlap_size, mask, temp_rgbimage, temp_normalimage)
-  print("distance array {0}: ".format(dis.shape))
-  print("input-patch position array {0}: ".format(pos.shape))
-  print("data-patch position array shape {0}: ".format(patch_pos.shape))
+  print("patch tiling result \n-->")
+  print("distance array: {0}".format(dis.shape))
+  print("input-patch position array: {0}".format(pos.shape))
+  print("data-patch position array shape: {0}\n".format(patch_pos.shape))
 
   ### remake mask for border noise
   mask = mask2tiny(mask, 5)
@@ -325,7 +305,7 @@ def main():
   np.save("{0}/{1}_estimated_normal.npy".format(output_path, filename), normal_result*2.0 -1.0)
   # cv2.imwrite("{0}/{1}_estimated_normal.png".format(output_path, filename), np.array((normal_result*255), dtype=np.uint8))
   # print("save reconst normal image --> {0}/{1}_estimated_normal.png".format(output_path, filename))
-  print("done!")
+  print("\n")
 
 
 
@@ -380,7 +360,7 @@ def main():
   
   ### save
   cv2.imwrite("{0}/{1}_outputs.png".format(output_path, filename), np.array(results, dtype=np.uint8))
-  print("save result!!")
+  print("save 2d result!!")
 
 
 

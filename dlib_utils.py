@@ -5,7 +5,7 @@
   @Email: rinsa@suou.waseda.jp
   @Date: 2017-07-18 23:14:59
   @Last Modified by:   rinsa318
-  @Last Modified time: 2019-03-07 20:49:36
+  @Last Modified time: 2019-03-19 14:19:44
  ----------------------------------------------------
 
   Usage:
@@ -33,7 +33,7 @@ from sklearn.neighbors import NearestNeighbors
 
 def get_landmarks(image, detector, predictor):
 
-  print("start get landmark ........")
+  # print("start get landmark ........")
   detections = detector(image, 1)
   for k,d in enumerate(detections): #For all detected face instances individually
   	shape = predictor(image, d) #Draw Facial landmarks with the predictor class
@@ -45,10 +45,10 @@ def get_landmarks(image, detector, predictor):
     landmarks[i][1] = shape.part(i).y
 
   if len(detections) > 0:
-    print("done!!")
+    # print("done!!\n")
     return landmarks
   else: #If no faces are detected, return error message to other function to handle
-    print("error")
+    print("error: could not find landmark\n")
     landmarks_error = ["error"]
     return landmarks_error
 
@@ -391,7 +391,7 @@ def kd_tree(image, landmarks, facet_array, num):
 
   """
 
-  print("stert kd-tree .......")
+  # print("stert kd-tree .......")
 
   center_image = image.copy()
 
@@ -441,7 +441,6 @@ def kd_tree(image, landmarks, facet_array, num):
 
       nbrs_list[y][x] = ind[nbrs_list.shape[1]*y + x]
 
-  print("done!!")
   return center_image, center_list, nbrs_list
 
 
@@ -467,10 +466,9 @@ def calculate_weight(image, landmarks, facet_array, mask, nbrs_list):
 
   for y in range(weight.shape[0]):
 
-    h = weight.shape[0]
-    per = float(y+1) / float(h) * 100
-    sys.stdout.write("\r%d" % per + " [%]")
-    sys.stdout.flush()
+
+    progress_bar(y, weight.shape[0] -1)
+
 
     for x in range(weight.shape[1]):
 
@@ -556,8 +554,8 @@ def calculate_weight(image, landmarks, facet_array, mask, nbrs_list):
         # weight[y][x] = (w[0], w[1], w[2], nearest_face_num)
 
 
-  print(" ")
-  print("done!!")
+  print("\n")
+
   return weight
 
 
@@ -595,6 +593,24 @@ def barycentric_weight(landmarks, triangles, P):
 
 
   return weight
+
+
+
+
+def progress_bar(n, N):
+
+  '''
+  print current progress
+  '''
+
+  percent = float(n) / float(N) * 100
+
+  ## convert percent to bar
+  current = "#" * int(percent//2)
+  # current = "=" * int(percent//2)
+  remain = " " * int(100/2-int(percent//2))
+  bar = "|{}{}|".format(current, remain)# + "#" * int(percent//2) + " " * int(100/2-int(percent//2)) + "|"
+  print("\r{}:{:3.0f}[%]".format(bar, percent), end="", flush=True)
 
 
 
